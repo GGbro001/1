@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metro Futuristic HUD</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020811;color:#eaffff;font-family:Arial,"Microsoft JhengHei",sans-serif;cursor:crosshair}
+body{background:radial-gradient(circle at 50% 45%,#17002c,#07101f 40%,#010308 82%);}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;background:linear-gradient(#0ff1 1px,transparent 1px) 0 0/100% 5px;opacity:.08}
+#app{height:100%;display:grid;grid-template-rows:62px 1fr 34px}
+header,footer{background:#031521;border-color:#08769c;border-style:solid}
+header{border-width:0 0 1px;display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.logo{font-size:27px;font-weight:900;color:#2ce4ff;text-shadow:0 0 15px #0cf}
+h1{font-size:16px;letter-spacing:3px;margin:0}header small{color:#5e9eb5;font-size:9px;letter-spacing:2px}
+.brand{display:flex;gap:11px;align-items:center}.stats{display:flex;gap:24px}.stats span{font-size:9px;color:#5d93a7}.stats b{display:block;font:700 17px monospace;color:#eaffff}.good{color:#27f0a2!important}.clock{font-size:21px!important;color:#65eaff!important}
+main{min-height:0;display:grid;grid-template-columns:270px 1fr 290px;gap:8px;padding:8px}
+.col{min-height:0;display:grid;gap:8px}.left{grid-template-rows:245px 1fr 170px}.right{grid-template-rows:205px 235px 1fr}
+.panel,#map{border:1px solid #a000ff;border-radius:7px;background:linear-gradient(145deg,#10051de8,#020611ed);box-shadow:inset 0 0 28px #ff00e60d,0 0 14px #a000ff2b;overflow:hidden;position:relative}
+.title{height:34px;padding:9px 10px;border-bottom:1px solid #64128a;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#ffb8ff}.title span{float:right;color:#28efa1;font-size:8px}
+.pad{padding:8px}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:5px}.kpi{padding:7px;background:#041725;border:1px solid #0a3c53;border-radius:4px}.kpi small{font-size:8px;color:#6398aa}.kpi b{display:block;font:700 20px monospace;margin-top:2px}
+.lines{margin-top:6px}.line{display:grid;grid-template-columns:24px 1fr auto;gap:5px;padding:5px 2px;border-bottom:1px solid #082b3b;font-size:9px}.badge{font-weight:bold;text-align:center;border-radius:3px;color:#001019;padding:2px}.br{background:#ffb52c}.r{background:#ff3c5f}.g{background:#20ee9a}.o{background:#ff963d}.bl{background:#398cff}.ok{color:#25eea0}.warn{color:#ff4d69}
+.trains{padding:5px 8px;font:9px monospace}.tr{display:grid;grid-template-columns:38px 25px 1fr 35px 30px;gap:4px;padding:6px 0;border-bottom:1px solid #092a3a}.head{color:#588da0;border:0}
+.buttons{display:flex;gap:6px;padding:5px 8px}button{flex:1;padding:7px;background:#06253a;border:1px solid #087aa5;color:#76e5ff;border-radius:4px;font-size:8px}
+#map{background:linear-gradient(#0a33464d 1px,transparent 1px) 0 0/35px 35px,linear-gradient(90deg,#0a33464d 1px,transparent 1px) 0 0/35px 35px,radial-gradient(circle,#07334c,#020b14 72%)}
+.maphead{position:absolute;z-index:3;top:12px;left:14px;right:14px;display:flex;justify-content:space-between;font-size:12px;font-weight:bold;letter-spacing:2px}.live{color:#25ffb8;font-size:8px}
+svg{position:absolute;width:100%;height:100%;inset:0}.route{fill:none;stroke-width:5;filter:drop-shadow(0 0 5px currentColor)}.station{fill:#061522;stroke-width:2.5}.trainDot{filter:drop-shadow(0 0 8px white)}
+.mapcard{position:absolute;left:14px;bottom:14px;z-index:4;padding:9px;width:205px;background:#03131fe8;border:1px solid #08789e;border-radius:5px}.mapcard small{font-size:8px;color:#6799aa}.big{font:700 23px monospace;color:#32e4ff}.bar{height:4px;background:#082d40;margin:6px 0}.bar i{display:block;height:100%;background:#2ce4ff}
+.metrics{position:absolute;right:14px;bottom:14px;z-index:4;display:flex;gap:5px}.metric{background:#03131fe8;border:1px solid #08617f;padding:7px 9px;border-radius:4px}.metric small{display:block;font-size:7px;color:#6495a8}.metric b{font:700 16px monospace}
+.cams{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:7px}.cam{height:70px;border:1px solid #0b5573;border-radius:4px;position:relative;background:linear-gradient(140deg,#28535c,#07151e 55%,#315862);overflow:hidden}.cam:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 48%,#0ff5 50%,transparent 52%);animation:scan 1.5s linear infinite}.cam label{position:absolute;z-index:2;top:4px;left:5px;font-size:7px}.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#28f1a3;box-shadow:0 0 7px #28f1a3}@keyframes scan{to{transform:translateY(65px)}}
+.system{padding:5px 9px}.sys{display:flex;justify-content:space-between;padding:7px 1px;border-bottom:1px solid #082b3c;font-size:9px}.sys b{color:#27efa1}
+.alert{margin:7px;padding:8px;border:1px solid #c33150;background:#300714bb}.alert h3{margin:0;color:#ff5573;font-size:11px}.alert p{font-size:8px;line-height:1.5;color:#c8a5af}.resolve{font-size:8px;color:#ff7188;border:1px solid #ff4564;padding:3px 7px}
+.log{padding:0 9px;font:8px monospace}.log div{padding:6px 0;border-bottom:1px solid #082839}.log em{font-style:normal;color:#29eea0}.log .err{color:#ff4b68}
+canvas{width:100%;height:130px}footer{border-width:1px 0 0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:#57899e;font:8px monospace}footer b{color:#29efa0}
+
+/* CYBERPUNK INTERACTIVE HUD */
+#hudPointer{position:fixed;z-index:100;pointer-events:none;width:26px;height:26px;border:1px solid #00f6ff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 14px #00f6ff,0 0 35px #ff00e6aa;mix-blend-mode:screen}
+#hudPointer:before,#hudPointer:after{content:"";position:absolute;background:#00f6ff;box-shadow:0 0 7px #00f6ff}
+#hudPointer:before{width:42px;height:1px;left:-9px;top:12px}.hudPointer:after{height:42px;width:1px;left:12px;top:-9px}
+#hudReadout{position:fixed;z-index:101;pointer-events:none;left:18px;bottom:50px;font:9px monospace;color:#62eaff;letter-spacing:1px;text-shadow:0 0 8px #00eaff}
+#scanBeam{position:fixed;z-index:19;pointer-events:none;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00f6ff,#ff00e6,transparent);box-shadow:0 0 18px #00f6ff;opacity:.25;animation:scanBeam 5s linear infinite}
+@keyframes scanBeam{0%{top:8%}50%{top:92%}100%{top:8%}}
+.cyber-selected{outline:1px solid #00f6ff!important;box-shadow:0 0 18px #00f6ff66,inset 0 0 18px #00f6ff12!important}
+.cyber-hover{border-color:#ff00e6!important;box-shadow:0 0 18px #ff00e655,inset 0 0 18px #ff00e60d!important}
+.panel,.cam,.metric,.kpi,.tr{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+@media (hover:hover) and (pointer:fine){
+ .panel:hover{transform:translateY(-1px)}
+ .cam:hover,.kpi:hover,.metric:hover{transform:translateY(-2px)}
+ button:hover{border-color:#ff00e6;box-shadow:0 0 14px #ff00e655}
+}
+
+/* 3D CYBERPUNK METRO NETWORK */
+#map{perspective:1100px;overflow:hidden;position:relative}
+#map svg{transform:rotateX(58deg) rotateZ(-3deg) scale(1.08);transform-origin:50% 58%;filter:drop-shadow(0 20px 25px #000b)}
+#map:before{content:"";position:absolute;inset:8%;background:repeating-linear-gradient(90deg,transparent 0 49px,#00eaff12 50px 51px),repeating-linear-gradient(0deg,transparent 0 49px,#ff00e612 50px 51px);transform:perspective(500px) rotateX(62deg) scale(1.5);transform-origin:center bottom;pointer-events:none}
+#map:after{content:"3D NETWORK // Z-AXIS ONLINE";position:absolute;right:12px;top:10px;font:9px monospace;color:#ff00e6;letter-spacing:2px;text-shadow:0 0 8px #ff00e6;pointer-events:none}
+.route3d{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.route3d-glow{fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.28;filter:blur(5px)}
+.route3d-shadow{fill:none;stroke:#000;stroke-width:18;opacity:.75;transform:translate(0,18px)}
+.node3d{filter:drop-shadow(0 0 8px currentColor)}
+.station3d{font-size:11px;fill:#dffcff;paint-order:stroke;stroke:#02050b;stroke-width:4px}
+.train3d{filter:drop-shadow(0 0 7px #fff)}
+.z-axis{stroke:#00eaff;stroke-width:1;stroke-dasharray:3 5;opacity:.45}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+<div class="brand"><div class="logo">M</div><div><h1>捷運行控中心 // NETWORK COMMAND</h1><small>FUTURISTIC HUD · REAL-TIME OPERATIONS SYSTEM</small></div></div>
+<div class="stats"><div><span>在線列車</span><b id="online">236 / 242</b></div><div><span>準點率</span><b class="good" id="otp">99.1%</b></div><div><span>平均班距</span><b>02:48</b></div><div><span>時間</span><b class="clock" id="clock">10:43:20</b></div></div>
+</header>
+<main>
+<section class="col left">
+<div class="panel"><div class="title">全線列車即時動態 <span>● LIVE // CYBER GRID</span></div><div class="pad"><div class="kpis">
+<div class="kpi"><small>運行列車</small><b id="trains">236</b></div><div class="kpi"><small>今日發車</small><b id="depart">2,341</b></div><div class="kpi"><small>旅客量</small><b id="passengers">682K</b></div><div class="kpi"><small>事件</small><b id="events">04</b></div></div>
+<div class="lines"><div class="line"><b class="badge br">BR</b><span>文湖線</span><em class="ok">● 正常</em></div><div class="line"><b class="badge r">R</b><span>淡水信義線</span><em class="ok">● 正常</em></div><div class="line"><b class="badge g">G</b><span>松山新店線</span><em class="ok">● 正常</em></div><div class="line"><b class="badge o">O</b><span>中和新蘆線</span><em class="ok">● 正常</em></div><div class="line"><b class="badge bl">BL</b><span>板南線</span><em class="warn">● 注意</em></div></div></div></div>
+<div class="panel"><div class="title">列車追蹤資料 <span>STREAM // TARGETABLE</span></div><div class="trains"><div class="tr head"><span>車號</span><span>線</span><span>位置</span><span>km/h</span><span>狀態</span></div><div id="rows"></div></div><div class="buttons"><button id="dispatch">自動調度</button><button>手動調度</button><button>班距設定</button></div></div>
+<div class="panel"><div class="title">列車運行速度 <span>LIVE CHART</span></div><canvas id="chart"></canvas></div>
+</section>
+
+<section id="map"><div class="maphead"><span>全線路網即時監控</span><span class="live">● DATA STREAM ONLINE</span></div>
+<svg viewBox="0 0 900 650" aria-label="3D schematic metro network">
+  <defs>
+    <linearGradient id="cyberBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00eaff"/><stop offset="1" stop-color="#0066ff"/></linearGradient>
+    <linearGradient id="cyberPink" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff00e6"/><stop offset="1" stop-color="#8a00ff"/></linearGradient>
+    <linearGradient id="cyberGreen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20ff9a"/><stop offset="1" stop-color="#00aaff"/></linearGradient>
+    <linearGradient id="cyberOrange" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd000"/><stop offset="1" stop-color="#ff4d00"/></linearGradient>
+  </defs>
+
+  <!-- elevated shadows / lower deck -->
+  <path class="route3d-shadow" d="M70 440L150 370L250 390L350 320L440 330L540 230L680 270L800 190"/>
+  <path class="route3d-shadow" d="M160 100L250 180L360 220L440 330L540 410L670 430L800 370"/>
+  <path class="route3d-shadow" d="M440 330L520 310L600 350L650 450L580 540L450 510L360 440L440 330"/>
+  <path class="route3d-shadow" d="M70 560L130 500L190 460L290 440L360 440L440 330"/>
+
+  <!-- vertical station/elevation guides -->
+  <g class="z-axis">
+    <path d="M150 370L150 410M350 320L350 365M540 230L540 275M680 270L680 315"/>
+    <path d="M250 180L250 225M440 330L440 375M670 430L670 475"/>
+    <path d="M520 310L520 350M650 450L650 490M450 510L450 550"/>
+  </g>
+
+  <!-- glowing route underlays -->
+  <path class="route3d-glow" stroke="#ff7a00" stroke-width="20" d="M70 440L150 370L250 390L350 320L440 330L540 230L680 270L800 190"/>
+  <path class="route3d-glow" stroke="#ff00e6" stroke-width="20" d="M160 100L250 180L360 220L440 330L540 410L670 430L800 370"/>
+  <path class="route3d-glow" stroke="#20ff9a" stroke-width="20" d="M440 330L520 310L600 350L650 450L580 540L450 510L360 440L440 330"/>
+  <path class="route3d-glow" stroke="#00eaff" stroke-width="20" d="M70 560L130 500L190 460L290 440L360 440L440 330"/>
+
+  <!-- main elevated routes -->
+  <path class="route3d" stroke="url(#cyberOrange)" stroke-width="8" d="M70 440L150 370L250 390L350 320L440 330L540 230L680 270L800 190"/>
+  <path class="route3d" stroke="url(#cyberPink)" stroke-width="8" d="M160 100L250 180L360 220L440 330L540 410L670 430L800 370"/>
+  <path class="route3d" stroke="url(#cyberGreen)" stroke-width="8" d="M440 330L520 310L600 350L650 450L580 540L450 510L360 440L440 330"/>
+  <path class="route3d" stroke="url(#cyberBlue)" stroke-width="8" d="M70 560L130 500L190 460L290 440L360 440L440 330"/>
+
+  <!-- stations -->
+  <g class="node3d">
+    <g fill="#ff9d00"><circle cx="150" cy="370" r="8"/><circle cx="350" cy="320" r="8"/><circle cx="540" cy="230" r="8"/><circle cx="680" cy="270" r="8"/></g>
+    <g fill="#ff00e6"><circle cx="250" cy="180" r="8"/><circle cx="440" cy="330" r="9"/><circle cx="670" cy="430" r="8"/></g>
+    <g fill="#20ff9a"><circle cx="520" cy="310" r="8"/><circle cx="650" cy="450" r="8"/><circle cx="450" cy="510" r="8"/></g>
+    <g fill="#00eaff"><circle cx="130" cy="500" r="8"/><circle cx="290" cy="440" r="8"/><circle cx="360" cy="440" r="8"/></g>
+  </g>
+
+  <!-- station labels -->
+  <g class="station3d">
+    <text x="125" y="350">北投</text><text x="325" y="300">士林</text>
+    <text x="515" y="210">松山</text><text x="650" y="255">動物園</text>
+    <text x="215" y="160">紅樹林</text><text x="455" y="315">台北車站</text>
+    <text x="625" y="455">景美</text><text x="425" y="535">台電大樓</text>
+    <text x="105" y="525">西門</text><text x="270" y="425">忠孝復興</text>
+  </g>
+
+  <!-- moving 3D trains -->
+  <g class="train3d">
+    <circle r="9" fill="#fff"><animateMotion dur="5.5s" repeatCount="indefinite" path="M70 440L150 370L250 390L350 320L440 330L540 230L680 270L800 190"/></circle>
+    <circle r="9" fill="#fff"><animateMotion dur="7s" repeatCount="indefinite" path="M160 100L250 180L360 220L440 330L540 410L670 430L800 370"/></circle>
+    <circle r="9" fill="#fff"><animateMotion dur="6.2s" repeatCount="indefinite" path="M440 330L520 310L600 350L650 450L580 540L450 510L360 440L440 330"/></circle>
+    <circle r="9" fill="#fff"><animateMotion dur="8s" repeatCount="indefinite" path="M70 560L130 500L190 460L290 440L360 440L440 330"/></circle>
+  </g>
+
+  <text x="30" y="620" fill="#00eaff" font-size="10" font-family="monospace">Z-AXIS / ELEVATION DATA: ACTIVE</text>
+  <text x="690" y="620" fill="#ff00e6" font-size="10" font-family="monospace">4 LINES // 36 NODES // 128 TRAINS</text>
+</svg>
+<div class="mapcard"><small>ACTIVE TRAIN / BL-1072</small><div class="big" id="speed">72 km/h</div><small>台北車站 → 西門　預計 +02:41</small><div class="bar"><i id="progress"></i></div><small>訊號強度 99.8%　自動駕駛 ON</small></div>
+<div class="metrics"><div class="metric"><small>準點率</small><b id="mOtp">99.1%</b></div><div class="metric"><small>平均速度</small><b id="avg">63</b></div><div class="metric"><small>事件</small><b id="queue">04</b></div></div>
+</section>
+
+<section class="col right">
+<div class="panel"><div class="title">CCTV 即時影像 <span>LIVE FEEDS</span></div><div class="cams"><div class="cam"><label><i class="dot"></i> 台北車站 C1</label></div><div class="cam"><label><i class="dot"></i> 忠孝復興 C2</label></div><div class="cam"><label><i class="dot"></i> 松山 C3</label></div><div class="cam"><label><i class="dot"></i> 南港 C4</label></div></div></div>
+<div class="panel"><div class="title">系統設備狀態 <span>ALL SYSTEMS // NEON</span></div><div class="system"><div class="sys"><span>⚡ 電力系統</span><b>● 正常</b></div><div class="sys"><span>◉ 通訊系統</span><b>● 正常</b></div><div class="sys"><span>◎ 號誌系統</span><b>● 正常</b></div><div class="sys"><span>▣ 月台門</span><b>● 正常</b></div><div class="sys"><span>▤ 空調系統</span><b>● 正常</b></div></div>
+<div class="alert"><h3>⚠ 突發警報　<span id="alertTime">10:43:12</span></h3><p><b>板南線 BL-1072</b><br>西門站 → 龍山寺　車門感測異常<br>影響：列車延誤約 02:41</p><span class="resolve">● 處理中</span></div></div>
+<div class="panel"><div class="title">行控事件紀錄 <span>EVENT LOG</span></div><div class="log" id="logs"></div></div>
+</section>
+</main>
+<footer><span>SECURE CONTROL NETWORK // CHANNEL 07</span><span>DATA STREAM <b id="packet">8,492</b> pkt/s　● SYSTEM NOMINAL</span></footer>
+</div>
+<script>
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0");
+setInterval(()=>{let d=new Date();$("#clock").textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;$("#alertTime").textContent=$("#clock").textContent;$("#packet").textContent=(7600+Math.random()*2200|0).toLocaleString()},1000);
+const data=[["1028","BL","忠孝復興","68"],["1587","BR","動物園","54"],["2034","R","台北車站","72"],["1762","G","台電大樓","65"],["2489","O","迴龍","58"],["1376","BL","西門","70"],["1890","R","紅樹林","60"],["2215","G","景美","63"]];
+function rows(){$("#rows").innerHTML=data.map(r=>`<div class="tr"><span>${r[0]}</span><b class="badge ${r[1].toLowerCase()}">${r[1]}</b><span>${r[2]}</span><span>${Math.max(0,+r[3]+(Math.random()*10-5)|0)}</span><span class="ok">● 正常</span></div>`).join("")}
+rows();setInterval(rows,1700);
+const c=$("#chart"),ctx=c.getContext("2d");
+function chart(){let W=c.clientWidth,H=c.clientHeight,d=devicePixelRatio||1;c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,W,H);ctx.strokeStyle="#0a3a50";for(let y=15;y<H;y+=25){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}["#ffb52c","#ff3157","#20ed9a","#398cff"].forEach((col,k)=>{ctx.beginPath();for(let x=0;x<W;x+=5){let y=H/2+Math.sin(x/23+k)*12+Math.sin(x/8+k*2)*6+k*5;x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.strokeStyle=col;ctx.lineWidth=1.3;ctx.stroke()})}
+chart();addEventListener("resize",chart);setInterval(chart,650);
+$("#logs").innerHTML=[["10:42","BL-1072","西門","車門感測異常","處理中"],["10:39","R-2034","台北車站","旅客量偏高","已處理"],["10:35","G-1762","公館","號誌確認","已排除"],["10:31","O-2489","迴龍","月台門檢查","已排除"],["10:28","BR-1587","動物園","班距調整","已完成"]].map((x,i)=>`<div>${x[0]}　<b>${x[1]}</b>　${x[2]}　${x[3]}　<em>${x[4]}</em></div>`).join("");
+let n=0;setInterval(()=>{n++;let t=232+Math.random()*10|0,o=(98.8+Math.random()*.5).toFixed(1),e=(3+Math.random()*4|0).toString().padStart(2,"0");$("#trains").textContent=t;$("#online").textContent=t+" / 242";$("#otp").textContent=o+"%";$("#mOtp").textContent=o+"%";$("#depart").textContent=(2341+n%14).toLocaleString();$("#passengers").textContent=(680+Math.random()*10|0)+"K";$("#events").textContent=e;$("#queue").textContent=e;$("#avg").textContent=58+Math.random()*10|0;$("#speed").textContent=65+Math.random()*17|0+" km/h";$("#progress").style.width=62+Math.random()*25+"%"},1100);
+$("#dispatch").onclick=()=>{$("#dispatch").textContent="調度執行中…";setTimeout(()=>$("#dispatch").textContent="調度完成 ✓",800);setTimeout(()=>$("#dispatch").textContent="自動調度",1900)};
+
+/* Mouse interactive HUD */
+const root=document.body;
+const pointer=document.getElementById("hudPointer");
+const readout=document.getElementById("hudReadout");
+let mouseX=innerWidth/2, mouseY=innerHeight/2;
+let targetName="NONE";
+
+document.addEventListener("mousemove", e=>{
+  mouseX=e.clientX; mouseY=e.clientY;
+  pointer.style.left=mouseX+"px"; pointer.style.top=mouseY+"px";
+  readout.textContent=`HUD LINK // X:${String(mouseX).padStart(4,"0")} Y:${String(mouseY).padStart(4,"0")} // TARGET:${targetName}`;
+  const rx=(mouseX/innerWidth-.5), ry=(mouseY/innerHeight-.5);
+  document.querySelectorAll(".panel,#map").forEach((el,i)=>{
+    const depth=(i%3+1)*0.8;
+    el.style.transform=`translate(${rx*depth}px,${ry*depth}px)`;
+  });
+});
+
+document.querySelectorAll(".panel,.cam,.metric,.kpi").forEach(el=>{
+  el.addEventListener("mouseenter",()=>{
+    el.classList.add("cyber-hover");
+    targetName=(el.querySelector(".title")?.textContent||el.querySelector("label")?.textContent||"PANEL").trim().split(/\s+/).slice(0,2).join("_").toUpperCase();
+  });
+  el.addEventListener("mouseleave",()=>{
+    el.classList.remove("cyber-hover");
+    targetName="NONE";
+  });
+});
+
+document.getElementById("map").addEventListener("click",e=>{
+  const box=document.getElementById("map");
+  const x=((e.clientX-box.getBoundingClientRect().left)/box.clientWidth*900).toFixed(0);
+  const y=((e.clientY-box.getBoundingClientRect().top)/box.clientHeight*650).toFixed(0);
+  targetName=`MAP_${x}_${y}`;
+  readout.textContent=`HUD LOCK // GRID:${x},${y} // TARGET: ${targetName}`;
+  box.classList.add("cyber-selected");
+  setTimeout(()=>box.classList.remove("cyber-selected"),900);
+});
+
+document.querySelectorAll("#rows .tr").forEach(()=>{});
+const observeRows=()=>{
+  document.querySelectorAll("#rows .tr:not(.head)").forEach(row=>{
+    if(row.dataset.bound) return;
+    row.dataset.bound="1";
+    row.addEventListener("click",()=>{
+      document.querySelectorAll("#rows .tr").forEach(r=>r.classList.remove("cyber-selected"));
+      row.classList.add("cyber-selected");
+      targetName=(row.children[0]?.textContent||"TRAIN")+" // LOCKED";
+      readout.textContent=`TARGET LOCK // ${targetName}`;
+    });
+  });
+};
+setInterval(observeRows,300);
+observeRows();
+
+document.addEventListener("mouseleave",()=>{pointer.style.opacity=".35"});
+document.addEventListener("mouseenter",()=>{pointer.style.opacity="1"});
+
+const prefersReduced=matchMedia("(prefers-reduced-motion: reduce)");
+if(prefersReduced.matches){
+  document.getElementById("scanBeam").style.display="none";
+}
+
+</script>
+<div id="hudPointer"></div><div id="scanBeam"></div><div id="hudReadout">HUD LINK // X:000 Y:000 // TARGET: NONE</div></body>
+</html>
